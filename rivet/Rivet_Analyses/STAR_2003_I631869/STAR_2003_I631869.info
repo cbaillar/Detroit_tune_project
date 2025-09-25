@@ -1,0 +1,18 @@
+Name: STAR_2003_I631869
+Year: 2003
+Experiment: STAR
+Collider: RHIC
+InspireID: 631869
+Reentrant: true
+Status: UNVALIDATED REENTRANT
+Summary: Cross Sections and Transverse Single-Spin Asymmetries in Forward Neutral Pion Production from Proton Collisions at ${\sqrt{s}=200}$ GeV
+Authors:
+ - Manny Rosales Aguilar maro323@uky.edu
+References:
+ - 'Phys.Rev.Lett. 92 (2004) 171801'
+ - 'DOI:10.1103/PhysRevLett.92.171801'
+ - 'arXiv:hep-ex/0310058'
+Beams: [p+, p+]
+Energies: [[100,100]]
+Description:
+	Measurements of the production of forward high energy $\pi^0$ mesons from transversely polarized proton collisions at $\sqrt{s}=200\ $GeV are reported. The cross section is generally consistent with next-to-leading order perturbative QCD calculations. The analyzing power is small at $x_F$ below about 0.3, and becomes positive and large at higher $x_F$, similar to the trend in data at $\sqrt{s}\le 20$ GeV. The analyzing power is in qualitative agreement with perturbative QCD model expectations. This is the first significant spin result seen for particles produced with $p_T > 1\ $GeV/c at a polarized proton collider.

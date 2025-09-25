@@ -1,0 +1,20 @@
+Name: BRAHMS_2007_I742956
+Year: 2007
+Summary: Production of Mesons and Baryons at High Rapidity and High $P_{T}$ in Proton-Proton  Collisions at $\sqrt{s} = 200$ GeV
+Experiment: BRAHMS
+Collider: RHIC
+InspireID: 742956
+Reentrant: true
+Status: UNVALIDATED REENTRANT
+Authors:
+ - Manny Rosales Aguilar maro323@uky.edu
+References:
+ - 'Phys.Rev.Lett. 98 (2007) 252001'
+ - 'DOI:10.1103/PhysRevLett.98.252001'
+ - 'arXiv:hep-ex/0701041'
+Beams: [p+, p+]
+Energies: [200]
+Options:
+ - ENERGY=200
+Description:
+	We present particle spectra for charged hadrons $\pi^\pm, K^\pm, p$  and $\bar{p}$ from pp collisions at $\sqrt{s}=200$ GeV measured for the first time at forward rapidities (2.95 and 3.3). The kinematics of these measurements are skewed in a way that probes the small momentum fraction in one of the protons and large fractions in the other.  Large proton to pion ratios are observed at values of transverse momentum that extend up to  4 GeV/c, where protons have momenta up to 35 GeV. Next-to-leading order perturbative QCD calculations describe the production of pions and kaons well at these rapidities,  but fail to account for the large proton yields and small $\bar{p}/p$ ratios. 

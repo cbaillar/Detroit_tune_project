@@ -1,0 +1,17 @@
+Name: STAR_2021_I1853218
+Year: 2021
+Experiment: STAR
+Collider: RHIC
+InspireID: 1853218
+Authors:
+ - Isaac Mooney <fs3383@wayne.edu>
+References:
+ - 'Phys.Rev.D 104 (2021) 5, 052007'
+ - 'DOI:10.1103/PhysRevD.104.052007 '
+ - 'arXiv:2103.13286'
+Beams: [p+, p+]
+Energies: [[100,100]]
+Status: UNVALIDATED REENTRANT
+Reentrant: true
+Summary: Invariant Jet Mass Measurements in $pp$ Collisions at $\sqrt{s}=\unit[200]{GeV}$ at RHIC
+Description: We present the first inclusive measurements of the invariant and SoftDrop jet mass in proton-proton collisions at $\sqrt{s}=\unit[200]{GeV}$ at STAR. The measurements are fully corrected for detector effects, and reported differentially in both the jet transverse momentum and jet radius parameter. We compare the measurements to established leading-order Monte Carlo event generators and find that STAR-tuned PYTHIA-6 reproduces the data, while LHC tunes of PYTHIA-8 and HERWIG-7 do not agree with the data, providing further constraints on parameter tuning. Finally, we observe that SoftDrop grooming, for which the contribution of wide-angle non-perturbative radiation is suppressed, shifts the jet mass distributions into closer agreement with the partonic jet mass as determined by both PYTHIA-8 and a next-to-leading-logarithmic accuracy perturbative QCD calculation. These measurements complement recent LHC measurements in a different kinematic region, as well as establish a baseline for future jet mass measurements in heavy-ion collisions at RHIC.

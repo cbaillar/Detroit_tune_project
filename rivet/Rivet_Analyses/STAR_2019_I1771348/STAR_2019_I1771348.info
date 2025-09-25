@@ -1,0 +1,19 @@
+Name: STAR_2019_I1771348
+Year: 2019
+Experiment: STAR
+Collider: RHIC
+InspireID: 1771348
+Status: UNVALIDATED REENTRANT
+Reentrant: true
+Authors:
+ - Raghav Kunnawalkam Elayavalli <raghav.ke@yale.edu>
+ - Veronica Verkwest <vverkest@gmail.com>
+ - Yang He <yanghe@rcf.rhic.bnl.gov>
+References:
+ - 'Phys.Rev.D 101 (2020) 5, 052004'
+ - 'DOI:10.1103/PhysRevD.101.052004'
+ - 'arXiv:1912.08187'
+Beams: [p+, p+]
+Energies: [[100,100]]
+Summary: Underlying event measurements in p+p collisions at $\sqrt{s}=$ 200 GeV at RHIC
+Description: Particle production sensitive to non-factorizable and non-perturbative processes that contribute to the underlying event associated with a high transverse momentum ($p_{T}$) jet in proton+proton collisions at $\sqrt{s}$=200 GeV is studied with the STAR detector. Each event is divided into three regions based on the azimuthal angle with respect to the highest-$p_{T}$ jet direction, in the leading jet direction ("Toward"), opposite to the leading jet ("Away"), and perpendicular to the leading jet ("Transverse").  In the Transverse region, the average charged particle density is found to be between 0.4 and 0.6 and the mean transverse momentum, $\langle  p_{T}\rangle$, between 0.5-0.7~GeV/$c$ for particles with $p_{T}>$0.2~GeV/$c$ at mid-pseudorapidity ($|\eta|<$1) and jet $p_{T}>$15~GeV/$c$. Both average particle density and $\langle p_{T}\rangle$ depend weakly on the leading jet $p_{T}$. Closer inspection of the Transverse region hints that contributions to the underlying event from  initial- and final-state radiation are significantly smaller in these collisions than at the higher energies, up to 13 TeV, recorded at the LHC. Underlying event measurements associated with a high-$p_{T}$ jet will contribute to our understanding of QCD processes at hard and soft scales at RHIC energies, as well as provide constraints to modeling of underlying event dynamics.

@@ -1,0 +1,17 @@
+Name: STAR_2020_I1783875
+Year: 2020
+Experiment: STAR
+Collider: RHIC
+InspireID: 1783875
+Authors:
+ - Raghav Kunnawalkam Elayavalli <raghav.ke@yale.edu>
+Status: UNVALIDATED REENTRANT
+Reentrant: true
+References:
+ - 'Phys.Lett.B 811 (2020) 135846'
+ - 'https://doi.org/10.1016/j.physletb.2020.135846'
+ - 'arXiv:2003.02114'
+Beams: [p+, p+]
+Energies: [[100,100]]
+Summary: Measurement of Groomed Jet Substructure Observables in \pp Collisions at $\sqrt{s} = 200$~GeV with STAR
+Description: In this letter, measurements of the shared momentum fraction ($z_{\rm{g}}$) and the groomed jet radius ($R_{\rm{g}}$), as defined in the SoftDrop algorihm, are reported in \pp collisions at $\sqrt{s} = 200$ GeV collected by the STAR experiment. These substructure observables are differentially measured for jets of varying resolution parameters from $R = 0.2 - 0.6$ in the transverse momentum range $15 < p_{\rm{T, jet}} < 60$  GeV$/c$. These studies show that, in the $p_{\rm{T, jet}}$ range accessible at $\sqrt{s} = 200$ GeV and with increasing jet resolution parameter and jet transverse momentum, the $z_{\rm{g}}$ distribution asymptotically converges to the DGLAP splitting kernel for a quark radiating a gluon. The groomed jet radius measurements reflect a momentum-dependent narrowing of the jet structure for jets of a given resolution parameter, i.e., the larger the $p_{\rm{T, jet}}$, the narrower the first splitting. For the first time, these fully corrected measurements are compared to Monte Carlo generators with leading order QCD matrix elements and leading log in the parton shower, and to state-of-the-art theoretical calculations at next-to-leading-log accuracy. We observe that PYTHIA 6 with parameters tuned to reproduce RHIC measurements is able to quantitatively describe data, whereas PYTHIA 8 and HERWIG 7, tuned to reproduce LHC data, are unable to provide a simultaneous description of both $z_{\rm{g}}$ and $R_{\rm{g}}$, resulting in opportunities for fine parameter tuning of these models for \pp collisions at RHIC energies. We also find that the theoretical calculations without non-perturbative corrections are able to qualitatively describe the trend in data for jets of large resolution parameters at high $p_{\rm{T, jet}}$, but fail at small jet resolution parameters and low jet transverse momenta.
