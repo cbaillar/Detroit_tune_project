@@ -2,9 +2,11 @@
 
 **Rivet Analyses**
 
-Merging problems: Reference to fix https://github.com/cnattras/RIVETAnalyses/blob/main/PHENIX_2001_I562409/PHENIX_2001_I562409.cc
+Merging problems: 
 BRAHMS_2007_I742956
 STAR_2012_I930463
+
+Reference to fix https://github.com/cnattras/RIVETAnalyses/blob/main/PHENIX_2001_I562409/PHENIX_2001_I562409.cc
 
 Need to check: 
 STAR_2006_I709170
