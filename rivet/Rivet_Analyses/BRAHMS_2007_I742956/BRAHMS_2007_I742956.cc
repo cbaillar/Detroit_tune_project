@@ -34,6 +34,7 @@ namespace Rivet {
         book(_h["CrsSecKminus2"], 10, 1, 1);
         book(_h["CrsSecP2"], 11, 1, 1);
         book(_h["CrsSecAntiP2"], 12, 1, 1);
+
         
         
     }
@@ -79,19 +80,9 @@ namespace Rivet {
 
     /// Normalise histograms etc., after the run
     void finalize() {
-        
-        scale(_h["CrsSecPIplus"], ((crossSection()/millibarn)/sumOfWeights())); // XSec is in units of mb in paper. Typicall run prints out in picobarns
-        scale(_h["CrsSecPIminus"], ((crossSection()/millibarn)/sumOfWeights()));
-        scale(_h["CrsSecKplus"], ((crossSection()/millibarn)/sumOfWeights()));
-        scale(_h["CrsSecKminus"], ((crossSection()/millibarn)/sumOfWeights()));
-        scale(_h["CrsSecP"], ((crossSection()/millibarn)/sumOfWeights()));
-        scale(_h["CrsSecAntiP"], ((crossSection()/millibarn)/sumOfWeights()));
-        scale(_h["CrsSecPIplus2"], ((crossSection()/millibarn)/sumOfWeights()));
-        scale(_h["CrsSecPIminus2"], ((crossSection()/millibarn)/sumOfWeights()));
-        scale(_h["CrsSecKplus2"], ((crossSection()/millibarn)/sumOfWeights()));
-        scale(_h["CrsSecKminus2"], ((crossSection()/millibarn)/sumOfWeights()));
-        scale(_h["CrsSecP2"], ((crossSection()/millibarn)/sumOfWeights()));
-        scale(_h["CrsSecAntiP2"], ((crossSection()/millibarn)/sumOfWeights()));
+        double xs = crossSection()/millibarn;
+        double sf = xs/sumOfWeights();
+        scale(_h, sf);
                 
     }
  

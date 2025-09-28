@@ -1,0 +1,20 @@
+Name: STAR_2006_I709170_TEST
+Year: 2006
+Experiment: STAR
+Collider: RHIC
+InspireID: 709170
+Reentrant: true
+Status: UNVALIDATED REENTRANT
+Summary: Identified hadron spectra at large transverse momentum in $p$+$p$ and $d$+Au collisions at $\sqrt{s_{\mathrm {NN}}}$ = 200 GeV
+Authors:
+ - Yuanjing Ji <yuanjingji@lbl.gov>
+ - Bedanga Mohanty <bedanga@rcf.bnl.gov>
+ - Hendrik Hoeth <hendrik.hoeth@cern.ch>
+References:
+ - 'Phys. Lett. B637, 161'
+ - 'DOI:10.1016/j.physletb.2006.04.032'
+ - 'arXiv:nucl-ex/0601033'
+Beams: [p+, p+]
+Energies: [[100,100]]
+Description:
+	We present the transverse momentum ($p_{\mathrm T}$) spectra for identified charged pions, protons and anti-protons from $p$+$p$ and $d$+Au collisions at $\sqrt{s_{\mathrm {NN}}}$ = 200 GeV.  The spectra are measured around midrapidity ($\mid$$y$$\mid$ $<$ 0.5) over the range of 0.3 $<$ $p_{\mathrm T}$ $<$ 10 GeV/$c$ with particle identification from the ionization energy loss and its relativistic rise in the Time Projection Chamber and Time-of-Flight in STAR. The charged pion and proton+anti-proton spectra at high $p_{\mathrm T}$ in $p$+$p$ and $d$+Au collisions are in good agreement with a phenomenological model (EPOS) and with next-to-leading order perturbative quantum chromodynamic (NLO pQCD) calculations with a specific fragmentation scheme and factorization scale. We found that all proton, anti-proton and charged pion spectra in $p$+$p$ collisions follow $x_{\mathrm T}$-scaling for the momentum range where particle production is dominated by hard processes ($p_{\mathrm T}$ ${}^>_{\sim}$ 2 GeV/$c$). The nuclear modification factor around midrapidity is found to be greater than unity for charged pions and to be even larger for protons at 2 $<$ $p_{\mathrm T}$ $<$ 5 GeV/$c$.
