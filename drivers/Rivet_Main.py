@@ -7,26 +7,28 @@ import os
 import shutil
 import subprocess
 import sys
+import glob
+import random
 
 ###########################################################
 ################### SCRIPT PARAMETERS #####################
 work_dir= os.environ.get('WORKDIR', '/workdir')  # Default to /workdir
-main_dir = f"{work_dir}/Detroit_tune_Project"
+main_dir = f"{work_dir}/Detroit_tune_project"
 seed = 43                   #seed for LHS
 model_seed = 283            #seed for model
 
 clear_rivet_models = True          #clear rivet directory
 Coll_System = ['pp_200']   # ['pp_200', 'pp_7000'] 
 Get_Design_Points = True   #True: uses LHS to get design points False: loads design points in input file
-Rivet_Setup = True
+Rivet_Setup = False
 nsamples = 5              #number of design points
 model = 'pythia8'           #only pythia8 (atm)
-Run_Model = True            #run design points through model and Rivet
+Run_Model = False            #run design points through model and Rivet
 PT_Min = -1 
 PT_Max = -1
 nevents = 100             # number of events for model in each run
-Rivet_Merge =True
-Write_input_Rivet = True   #gets Data/Pred info from html files 
+Rivet_Merge = False
+Write_input_Rivet = False   #gets Data/Pred info from html files 
 
 ###########################################################
 ###########################################################
@@ -43,23 +45,49 @@ if Get_Design_Points:
     print("Generating design points.")
     os.makedirs(f"{main_dir}/input/Design", exist_ok=True)
 
-    ###
-    if () :
-        n =
+    #(Leo: indexing dat file generated)
+    index_numbers = []
+    index_files = glob.glob(f"{main_dir}/input/Design/Design__Rivet__*.dat")
+    for file in index_files:
+        num = int(file.split("__")[-1].split(".")[0])
+        index_numbers.append(num)
 
-    Design_file = 'Design__Rivet__' + n +  '.dat'
+    max_index = max(index_numbers) if index_numbers else 0
+    new_index = max_index + 1 
+
+    Design_file = f'Design__Rivet__{new_index}.dat'
     output_file = f'{main_dir}/input/Design/{Design_file}'
     shutil.copy(f"{main_dir}/input/Rivet/parameter_prior_list.dat", output_file)
 
     RawDesign = Reader.ReadDesign(f'{main_dir}/input/Rivet/parameter_prior_list.dat')
     priors, parameter_names, dim= DesignPoints.get_prior(RawDesign)
-    design_points = DesignPoints.get_design(nsamples, priors, seed)
+    
+    #(Leo: stores all unique rows from previouses design points)
+    existing_rows = set()
+    for oldfile in glob.glob(f"{main_dir}/input/Design/*.dat"):
+        with open(oldfile) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                existing_rows.add(line)
+    
+    #(Leo: check if current_rows include values in existing_rows)
+    run_duplicate_check = True 
+    while(run_duplicate_check == True):
+        design_points = DesignPoints.get_design(nsamples, priors, seed)        
+        current_rows = {' '.join(f"{val:.18e}" for val in row) for row in design_points}
+        if current_rows.isdisjoint(existing_rows):
+            print("🟢 No duplicates detected")
+            run_duplicate_check = False        
+        else:
+            print("🟡 Duplicates detected, re-generating design_points")
+            seed = random.randint(1,2**32-1) 
 
     with open(output_file, 'a') as f:
-    # Write index line based on row positions
-
-        
+    # Write index line based on row positions        
         index_line = '\n' + "# Design point indices (row index): " + ' '.join(str(i) for i in range(len(design_points))) + '\n'
+        f.write(f"\n\n# LHS Seed = {seed}; Number of Design Points = {nsamples}")
         f.write(index_line)
 
         # Write design points
@@ -69,7 +97,16 @@ if Get_Design_Points:
 
 else:
     print("Loading design points from input directory.")
-    RawDesign = Reader.ReadDesign(f'{main_dir}/input/Design/Design__Rivet.dat')
+
+    index_numbers = []
+    index_files = glob.glob(f"{main_dir}/input/Design/Design__Rivet__*.dat")
+    for file in index_files:
+        num = int(file.split("__")[-1].split(".")[0])
+        index_numbers.append(num)
+    max_index = max(index_numbers)
+
+    Design_file = f'Design__Rivet__{max_index}.dat'
+    RawDesign = Reader.ReadDesign(f'{main_dir}/input/Design/{Design_file}')
     priors, parameter_names, dim= DesignPoints.get_prior(RawDesign)
     design_points = RawDesign['Design']
 
@@ -167,7 +204,7 @@ if Run_Model:
 
             subprocess.run([
                 'bash', f'/usr/local/share/Bayes_HEP/Design_Points/Models/{model}/scripts/run_{model}.sh',
-                ','.join(system_analyses), input_dir, project_dir, System, Energy, str(nevents), str(model_seed), param_tag, merge_tag, PT_Min, PT_Max], check=True)
+                ','.join(system_analyses), input_dir, project_dir, System, Energy, str(nevents), str(model_seed), param_tag, merge_tag, str(PT_Min), str(PT_Max)], check=True)
 
 ############# Rivet Merge/HTML #################
 if Rivet_Merge:
