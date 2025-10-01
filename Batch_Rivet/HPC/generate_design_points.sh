@@ -1,19 +1,19 @@
 #!/bin/bash
 ###### THIS IS FOR BATCHING JOBS WITH SLURM ON HPC
 
-DO_GENERATE_DESIGN_POINTS=false
-DO_PT_HARD_BINS=false
+DO_GENERATE_DESIGN_POINTS=true
+DO_PT_HARD_BINS=true
 PT_EDGES=(5 10 20 30 40 50 60 70) 
-DO_BATCH_RUN=false
-DO_RIVET_MERGE=false
+DO_BATCH_RUN=true
+DO_RIVET_MERGE=true
 DO_WRITE_INPUTS=true
 
 # === Config ===
 USER_DIR="/lustre/isaac24/proj/UTK0244/cbaillar"
 COLLISIONS="pp_200" #"pp_7000 pp_13000"
-TOTAL_POINTS=50        # Total number of design points
-TOTAL_EVENTS=200000    # Total number of events
-NEVENTS=100000        # Events per job
+TOTAL_POINTS=10        # Total number of design points
+TOTAL_EVENTS=100    # Total number of events
+NEVENTS=100        # Events per job
 
 # === PATHS ===
 MAIN_DIR="${WORKDIR:-/workdir}/Detroit_tune_Project"

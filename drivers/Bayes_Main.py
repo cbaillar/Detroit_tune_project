@@ -11,7 +11,6 @@ import shutil
 import matplotlib.pyplot as plt
 import glob
 import dill
-
     
 ###########################################################
 ################### SCRIPT PARAMETERS #####################
@@ -32,10 +31,10 @@ validation_size = 20        #percentage of design points used for validation
 Train_Surmise = True
 Load_Surmise = True
 
-Train_Scikit = False
-Load_Scikit = False
+Train_Scikit = True
+Load_Scikit = True
 
-PCA = True 
+PCA = False 
 
 ######## Calibration
 Run_Caibration = True 
