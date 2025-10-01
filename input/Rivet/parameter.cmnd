@@ -3,8 +3,8 @@
 PDF:pSet = 17
 MultipartonInteractions:ecmRef = 200
 MultipartonInteractions:bprofile = 2
-HardQCD:all = on                   ! All hard QCD processes are on
-SoftQCD:all = off 
+HardQCD:all = off                   ! All hard QCD processes are on
+SoftQCD:all = on
 
 ! These are tuning parameters
 MultipartonInteractions:pT0Ref          = 1
