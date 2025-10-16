@@ -5,6 +5,8 @@ from Bayes_HEP.Design_Points import data_pred as DataPred
 from Bayes_HEP.Emulation import emulation as Emulation
 from Bayes_HEP.Calibration import calibration as Calibration
 from Bayes_HEP.Design_Points import rivet_html_parser as RivetParser
+from Bayes_HEP.Design_Points import index as Index
+
 
 import os
 import shutil
@@ -16,7 +18,7 @@ import dill
 ################### SCRIPT PARAMETERS #####################
 
 work_dir= os.environ.get('WORKDIR', '/workdir')  # Default to /workdir
-main_dir = f"{work_dir}/Detroit_tune_Project"
+main_dir = f"{work_dir}/Detroit_tune_project"
 
 seed = 43 
 
@@ -24,30 +26,30 @@ clear_output = True         #clear output directory
 Coll_System = ['pp_200']   #['AuAu_200', 'PbPb_2760', 'PbPb_5020']
 
 model = 'pythia8'
-train_size = 80             #percentage of design points used for training
-validation_size = 20        #percentage of design points used for validation
+train_size = 90             #percentage of design points used for training
+validation_size = 10        #percentage of design points used for validation
 
-######## Emulators
-Train_Surmise = True
-Load_Surmise = True
+######## Emulators       
+Train_Surmise = False
+Load_Surmise = False
 
-Train_Scikit = True
-Load_Scikit = True
+Train_Scikit = False
+Load_Scikit = False
 
 PCA = False 
 
 ######## Calibration
-Run_Caibration = True 
+Run_Caibration = False 
 nwalkers = 50
 npool = 5               #Number of CPU to use for sampler
 Samples = 100           #Number of MCMC samples  
 nburn = 0.25 * Samples  #burn in samples
 percent = 0.15          # Get traces for the last percentage of samples
-Load_Calibration = True
+Load_Calibration = False
 
 ####### Results 
 size = 1000  # Number of samples for Results
-Result_plots = True
+Result_plots = False
 
 ###########################################################
 ###########################################################
@@ -59,8 +61,20 @@ os.makedirs(output_dir, exist_ok=True)
 os.makedirs(output_dir + "/plots", exist_ok=True)
 
 ############## Design Points ####################
-print("Loading design points from input directory.")
-RawDesign = Reader.ReadDesign(f'{main_dir}/input/Design/Design__Rivet.dat')
+index_files = Index.get_design_index(main_dir)
+merged_Design_file = f"Design__Rivet__Merged.dat"
+merged_output_file = f'{main_dir}/input/Design/{merged_Design_file}'
+shutil.copy(f"{main_dir}/input/Rivet/parameter_prior_list.dat", merged_output_file)
+existing_rows = Index.get_existing_design_points(index_files)
+
+with open(merged_output_file, 'a') as f:
+    f.write(f"\n\n# Total Design Points Merged = {len(existing_rows)}")
+    f.write('\n' + "# Design point indices (row index): " + ' '.join(str(i) for i in range(len(existing_rows))) + '\n')   
+    f.write("\n".join(existing_rows) + "\n")
+print(f"➕ Appended {len(existing_rows)} design points to {merged_output_file}")
+print(f"Loading {merged_Design_file} from input directory.") #(Leo: loading design points -> merged design points)
+
+RawDesign = Reader.ReadDesign(f'{main_dir}/input/Design/{merged_Design_file}') #(Leo: changed the .dat file into the merged one)
 priors, parameter_names, dim= DesignPoints.get_prior(RawDesign)
 train_points, validation_points, train_indices, validation_indices = DesignPoints.load_data(train_size, validation_size, RawDesign['Design'], priors, seed)
 
@@ -70,8 +84,16 @@ plt.savefig(f"{output_dir}/plots/Design_Points.png")
 plt.show()
 
 print("Loading input directory.")
-prediction_dir, data_dir = f"{main_dir}/input/Prediction", f"{main_dir}/input/Data"
-    
+prediction_dir = f"{main_dir}/input/Prediction"
+data_dir = f"{main_dir}/input/Data"
+
+DG_predictions_files = glob.glob(f"{prediction_dir}/*.dat")
+merged_dir = f"{main_dir}/input/Prediction_Merged"
+os.makedirs(merged_dir, exist_ok=True)
+
+hist_groups = Index.group_histograms_by_design(DG_predictions_files)
+Index.merge_histogram_groups(hist_groups, merged_dir)
+
 Data = {}
 Predictions = {}
 all_data = {}
@@ -81,7 +103,7 @@ for system in Coll_System:
     System, Energy = system.split('_')[0], system.split('_')[1]  
     sys = System + Energy   
 
-    prediction_files = glob.glob(os.path.join(prediction_dir, f"Prediction__{model}__{Energy}__{System}__*__values.dat"))
+    prediction_files = glob.glob(os.path.join(merged_dir, f"Prediction__{model}__{Energy}__{System}__*__values.dat")) #(Leo: re-path to merged_dir)
     data_files = glob.glob(os.path.join(data_dir, f"Data__{Energy}__{System}__*.dat"))
 
     all_predictions = [Reader.ReadPrediction(f) for f in prediction_files]
@@ -93,6 +115,7 @@ for system in Coll_System:
     y_train_results, y_train_errors, y_val_results, y_val_errors = DataPred.get_predictions(all_predictions, train_indices, validation_indices, sys)
 
 print("Data and predictions loaded successfully.")
+raise SystemExit("Stopping script here")
 
 ######### Emulators ########
 Emulators = {}
@@ -126,11 +149,11 @@ elif Load_Scikit:
 
     Emulators['scikit'] = {}
     Emulators['scikit'], PredictionVal['scikit_val'], PredictionTrain['scikit_train'] = Emulation.load_scikit(Emulators['scikit'], x, train_points, validation_points, output_dir)
-
+ 
 os.makedirs(f"{output_dir}/plots/emulators/", exist_ok=True)
 
 Plots.plot_rmse_comparison(y_train_results, y_val_results, PredictionTrain, PredictionVal, output_dir)
-    
+
 ########### Calibration ###########
 if Run_Caibration:
     print("Running calibration.")
