@@ -2,6 +2,7 @@ from Bayes_HEP.Design_Points import reader as Reader
 from Bayes_HEP.Design_Points import design_points as DesignPoints
 from Bayes_HEP.Design_Points import plots as Plots
 from Bayes_HEP.Design_Points import rivet_html_parser as RivetParser
+from Bayes_HEP.Design_Points import index as Index   #(Leo: added this path)
 
 import os
 import shutil
@@ -9,25 +10,24 @@ import subprocess
 import sys
 import glob
 import random
-import numpy as np
 
 ###########################################################
 ################### SCRIPT PARAMETERS #####################
 work_dir= os.environ.get('WORKDIR', '/workdir')  # Default to /workdir
-main_dir = f"{work_dir}/Detroit_tune_Project"
-seed = 43                   #seed for LHS
-model_seed = 283            #seed for model
+main_dir = f"{work_dir}/Detroit_tune_project"
+seed = 43                #seed for LHS (original 43)
+model_seed = 283           #seed for model (original 283)
 
 clear_rivet_models = True          #clear rivet directory
 Coll_System = ['pp_200']   # ['pp_200', 'pp_7000'] 
-Get_Design_Points = False   #True: uses LHS to get design points False: loads design points in input file
-Rivet_Setup = False
-nsamples = 1              #number of design points
+Get_Design_Points = True   #True: uses LHS to get design points; False: loads design points in input file
+Rivet_Setup = True
+nsamples = 5              #number of design points
 model = 'pythia8'           #only pythia8 (atm)
-Run_Model = True            #run design points through model and Rivet
+Run_Model = True            #run design points through model and Rivet (the Runs and YODA)
 PT_Min = -1 
 PT_Max = -1
-nevents = 1000             # number of events for model in each run
+nevents = 500             # number of events for model in each run
 Rivet_Merge = True
 Write_input_Rivet = True   #gets Data/Pred info from html files 
 
@@ -40,76 +40,55 @@ if clear_rivet_models and os.path.exists(models_dir):
     print(f"Clearing output directory: {models_dir}")
     shutil.rmtree(models_dir)
 
-# ############## Design Points ####################
-
+############## Design Points ####################
 if Get_Design_Points: 
-    print("Generating design points.")
+    print("⚙️  Generating design points.")
     os.makedirs(f"{main_dir}/input/Design", exist_ok=True)
 
-    index_numbers = []
-    index_files = glob.glob(f"{main_dir}/input/Design/Design__Rivet__*.dat")
-    for file in index_files:
-        num = int(file.split("__")[-1].split(".")[0])
-        index_numbers.append(num)
+    #(Leo: get next design index based on exisiting ones)
+    index_files, max_index = Index.get_max_design_index(main_dir)
+    max_index = max_index + 1       #(Leo: index start at 1 when generated the for first time)
 
-    max_index = max(index_numbers) if index_numbers else 0
-    max_index = max_index + 1 
-
-    Design_file = f'Design__Rivet__{max_index}.dat'
+    Design_file = f'Design__Rivet__{max_index}.dat'     
     output_file = f'{main_dir}/input/Design/{Design_file}'
     shutil.copy(f"{main_dir}/input/Rivet/parameter_prior_list.dat", output_file)
 
     RawDesign = Reader.ReadDesign(f'{main_dir}/input/Rivet/parameter_prior_list.dat')
     priors, parameter_names, dim = DesignPoints.get_prior(RawDesign)
     
-    existing_rows = set()
-    for oldfile in glob.glob(f"{main_dir}/input/Design/*.dat"):
-        with open(oldfile) as f:
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                existing_rows.add(line)
+    existing_rows = Index.get_existing_design_points(index_files)
     
+    #(Leo: check if current_rows include values in existing_rows)
     run_duplicate_check = True 
-    while run_duplicate_check:
-        design_points = DesignPoints.get_design(nsamples, priors, seed)
-        design_points = np.atleast_2d(design_points)  
+    while(run_duplicate_check == True):
+        design_points = DesignPoints.get_design(nsamples, priors, seed)        
         current_rows = {' '.join(f"{val:.18e}" for val in row) for row in design_points}
-        if current_rows.isdisjoint(existing_rows):
+        if current_rows.isdisjoint(set(existing_rows)):
             print("🟢 No duplicates detected")
             run_duplicate_check = False        
         else:
             print("🟡 Duplicates detected, re-generating design_points")
-            seed = random.randint(1, 2**32 - 1) 
+            seed = random.randint(1,2**32-1)                
 
     with open(output_file, 'a') as f:
-        index_line = '\n' + "# Design point indices (row index): " + ' '.join(str(i) for i in range(len(design_points))) + '\n'
+    # Write index line based on row positions
         f.write(f"\n\n# LHS Seed = {seed}; Number of Design Points = {nsamples}")
+        index_line = '\n' + "# Design point indices (row index): " + ' '.join(str(i) for i in range(len(design_points))) + '\n'
         f.write(index_line)
+        
+        # Write design points
         for row in design_points:
             f.write(' '.join(f"{val:.18e}" for val in row) + '\n')
-    print(f"Appended {len(design_points)} design points to {output_file}")
+        
+    print(f"➕ Appended {len(design_points)} design points to {output_file}")
 
 else:
     print("Loading design points from input directory.")
-
-    index_numbers = []
-    index_files = glob.glob(f"{main_dir}/input/Design/Design__Rivet__*.dat")
-    for file in index_files:
-        num = int(file.split("__")[-1].split(".")[0])
-        index_numbers.append(num)
-
-    if not index_numbers:  
-        print("No Design files in directory. Please generate design points.")
-        sys.exit(1)
-
-    max_index = max(index_numbers)
-
+    index_files, max_index = Index.get_max_design_index(main_dir)
     Design_file = f'Design__Rivet__{max_index}.dat'
     RawDesign = Reader.ReadDesign(f'{main_dir}/input/Design/{Design_file}')
-    priors, parameter_names, dim = DesignPoints.get_prior(RawDesign)
-    design_points = np.atleast_2d(RawDesign['Design'])  
+    priors, parameter_names, dim= DesignPoints.get_prior(RawDesign)
+    design_points = RawDesign['Design']
 
 ################# Rivet Analyses ####################
 input_dir = f'{main_dir}/input/Rivet'
@@ -235,25 +214,24 @@ if Write_input_Rivet:
     os.makedirs(f"{main_dir}/input/Prediction", exist_ok=True)
  
     for system in Coll_System:
-            System, Energy = system.split('_')
+        System, Energy = system.split('_')
 
-            system_analyses = analyses_list[system]
-            print(system_analyses)
+        system_analyses = analyses_list[system]
+        print(system_analyses)
 
-            for i, point in enumerate(design_points):
-                DP = i + 1
+        for i, point in enumerate(design_points):
+            DP = i + 1
+            for analysis in system_analyses:
+                for hist in tagged_analyses[system][analysis]:
+                    base = f"{project_dir}/Models/{model}/html_reports/{model}_{System}_{Energy}_DP_{DP}_report.html/{analysis}/{hist}"
+                    datafile = base + "__data.py"
+                    labelfile = base + ".py"
+                    obs, subobs = RivetParser.extract_labels(labelfile)
 
-                for analysis in system_analyses:
-                    for hist in tagged_analyses[system][analysis]:
-                        base = f"{project_dir}/Models/{model}/html_reports/{model}_{System}_{Energy}_DP_{DP}_report.html/{analysis}/{hist}"
-                        datafile = base + "__data.py"
-                        labelfile = base + ".py"
-                        obs, subobs = RivetParser.extract_labels(labelfile)
+                    input_data_name = f"{main_dir}/input/Data/Data__{Energy}__{System}__{analysis}__{hist}"
+                    input_pred_name = f"{main_dir}/input/Prediction/Prediction__{model}__{Energy}__{System}__{analysis}__{hist}__DG{max_index}"
 
-                        input_data_name = f"{main_dir}/input/Data/Data__{Energy}__{System}__{analysis}__{hist}"
-                        input_pred_name = f"{main_dir}/input/Prediction/Prediction__{model}__{Energy}__{System}__{analysis}__{hist}___{hist}__DG_{max_index}"
-
-                        RivetParser.extract_data(datafile, model, input_data_name, input_pred_name, obs, subobs, DP)
+                    RivetParser.extract_data(datafile, model, input_data_name, input_pred_name, obs, subobs, DP)
 
 
 print("done")
