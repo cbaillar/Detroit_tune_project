@@ -266,7 +266,10 @@ if Rivet_Merge:
             print(f"⚠️ No analyses listed for {system}")
             continue
 
-        for i, point in enumerate(design_points):
+        #for i, point in enumerate(design_points):
+
+        for i in range(batch_start, min(batch_end, len(design_points))):
+            point = design_points[i]
             
             merge_tag = f"DP_{i+1}"
 
@@ -288,16 +291,22 @@ if Write_input_Rivet:
 
         for i, point in enumerate(design_points):
             DP = i + 1
+            skip_dp = False
             for analysis in system_analyses:
                 for hist in tagged_analyses[system][analysis]:
                     Experiment = analysis.split('_')[0]
                     base = f"{project_dir}/Models/{model}/html_reports/{model}_{System}_{Energy}_DP_{DP}_report.html/{analysis}/{hist}"
                     datafile = base + "__data.py"
                     labelfile = base + ".py"
+                    if not os.path.exists(datafile):
+                        print(f"[WARN] Missing data file for DP {DP}: {datafile} — skipping DP {DP}")
+                        skip_dp = True
+                        break
+
                     obs, subobs = RivetParser.extract_labels(labelfile)
 
                     input_data_name = f"{main_dir}/input/Data/Data__{Energy}__{System}__{analysis}__{hist}"
-                    input_pred_name = f"{main_dir}/input/Prediction/Prediction__{model}__{Energy}__{System}__{analysis}__{hist}___{hist}__DG_{max_index}"
+                    input_pred_name = f"{main_dir}/input/Prediction/Prediction__{model}__{Energy}__{System}__{analysis}__{hist}__DG_{max_index}"
 
                     RivetParser.extract_data(datafile, model, input_data_name, input_pred_name, obs, subobs, DP)
 

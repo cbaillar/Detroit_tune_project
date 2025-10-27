@@ -14,65 +14,41 @@ import dill
     
 ###########################################################
 ################### SCRIPT PARAMETERS #####################
-import argparse
-import os
 
-def str2bool(x):
-    return str(x).lower() in ['true', '1', 'yes', 'y']
+work_dir= os.environ.get('WORKDIR', '/workdir')  # Default to /workdir
+main_dir = f"{work_dir}/Detroit_tune_Project"
 
-parser = argparse.ArgumentParser(description="Run Bayesian Emulator and Calibration workflow.")
+seed = 43 
 
-parser.add_argument("--work_dir", type=str, default=None,
-    help="Top-level working directory (default: $WORKDIR or /workdir)")
-parser.add_argument("--main_dir", type=str, default=None,
-    help="Project main directory (default: <work_dir>/HPC_New_Project)")
-parser.add_argument("--seed", type=int, default=43)
-parser.add_argument("--clear_output", type=str2bool, default=True)
-parser.add_argument("--Coll_System", nargs="+", default=["pp_7000"],
-    help="List of collision systems (e.g. pp_7000 pPb_5020)")
-parser.add_argument("--model", type=str, default="pythia8")
-parser.add_argument("--train_size", type=int, default=80,
-    help="Percentage of design points for training")
-parser.add_argument("--validation_size", type=int, default=20,
-    help="Percentage of design points for validation")
-parser.add_argument("--Train_Surmise", type=str2bool, default=True)
-parser.add_argument("--Train_Scikit", type=str2bool, default=True)
-parser.add_argument("--PCA", type=str2bool, default=True)
-parser.add_argument("--Run_Calibration", type=str2bool, default=True)
-parser.add_argument("--nwalkers", type=int, default=50)
-parser.add_argument("--npool", type=int, default=5)
-parser.add_argument("--Samples", type=int, default=100)
-parser.add_argument("--nburn", type=int, default=50)
-parser.add_argument("--percent", type=float, default=0.15,
-    help="Get traces for the last percentage of samples")
-parser.add_argument("--Load_Calibration", type=str2bool, default=True)
-parser.add_argument("--size", type=int, default=1000,
-    help="Number of samples for results")
-parser.add_argument("--Result_plots", type=str2bool, default=True)
+clear_output = True         #clear output directory
+Coll_System = ['pp_200']   #['AuAu_200', 'PbPb_2760', 'PbPb_5020']
 
-args = parser.parse_args()
+model = 'pythia8'
+train_size = 80             #percentage of design points used for training
+validation_size = 20        #percentage of design points used for validation
 
-# Set/override variables using args
-work_dir = args.work_dir or os.environ.get('WORKDIR', '/workdir')
-main_dir = args.main_dir or f"{work_dir}/HPC_New_Project"
-seed = args.seed
-clear_output = args.clear_output
-Coll_System = args.Coll_System
-model = args.model
-train_size = args.train_size
-validation_size = args.validation_size
-Train_Surmise = args.Train_Surmise
-Train_Scikit = args.Train_Scikit
-PCA = args.PCA
-Run_Calibration = args.Run_Calibration
-nwalkers = args.nwalkers
-npool = args.npool
-Samples = args.Samples
-nburn = args.nburn
-percent = args.percent
-Load_Calibration = args.Load_Calibration
-size = args.size
-Result_plots = args.Result_plots
+######## Emulators
+Train_Surmise = True
+Load_Surmise = True
+
+Train_Scikit = True
+Load_Scikit = True
+
+PCA = False 
+
+######## Calibration
+Run_Caibration = True 
+nwalkers = 50
+npool = 5               #Number of CPU to use for sampler
+Samples = 100           #Number of MCMC samples  
+nburn = 0.25 * Samples  #burn in samples
+percent = 0.15          # Get traces for the last percentage of samples
+Load_Calibration = True
+
+####### Results 
+size = 1000  # Number of samples for Results
+Result_plots = True
+
 ###########################################################
 ###########################################################
 output_dir = f"{main_dir}/output"
@@ -84,21 +60,7 @@ os.makedirs(output_dir + "/plots", exist_ok=True)
 
 ############## Design Points ####################
 print("Loading design points from input directory.")
-
-index_files = DataPred.get_design_index(main_dir)
-merged_Design_file = f"Design__Rivet__Merged.dat"
-merged_output_file = f'{main_dir}/input/Design/{merged_Design_file}'
-shutil.copy(f"{main_dir}/input/Rivet/parameter_prior_list.dat", merged_output_file)
-existing_rows = DataPred.get_existing_design_points(index_files)
-
-with open(merged_output_file, 'a') as f:
-    f.write(f"\n\n# Total Design Points Merged = {len(existing_rows)}")
-    f.write('\n' + "# Design point indices (row index): " + ' '.join(str(i) for i in range(len(existing_rows))) + '\n')   
-    f.write("\n".join(existing_rows) + "\n")
-print(f"➕ Appended {len(existing_rows)} design points to {merged_output_file}")
-print(f"Loading {merged_Design_file} from input directory.") 
-
-RawDesign = Reader.ReadDesign(f'{main_dir}/input/Design/{merged_Design_file}')
+RawDesign = Reader.ReadDesign(f'{main_dir}/input/Design/Design__Rivet.dat')
 priors, parameter_names, dim= DesignPoints.get_prior(RawDesign)
 train_points, validation_points, train_indices, validation_indices = DesignPoints.load_data(train_size, validation_size, RawDesign['Design'], priors, seed)
 
@@ -108,13 +70,8 @@ plt.savefig(f"{output_dir}/plots/Design_Points.png")
 plt.show()
 
 print("Loading input directory.")
-
 prediction_dir, data_dir = f"{main_dir}/input/Prediction", f"{main_dir}/input/Data"
-DG_predictions_files = glob.glob(f"{prediction_dir}/*.dat")
-merged_dir = f"{main_dir}/input/Prediction_Merged"
-os.makedirs(merged_dir, exist_ok=True)
-DataPred.group_histograms_by_design(DG_predictions_files, merged_dir)
-
+    
 Data = {}
 Predictions = {}
 all_data = {}
@@ -124,7 +81,7 @@ for system in Coll_System:
     System, Energy = system.split('_')[0], system.split('_')[1]  
     sys = System + Energy   
 
-    prediction_files = glob.glob(os.path.join(merged_dir, f"Prediction__{model}__{Energy}__{System}__*__values.dat"))
+    prediction_files = glob.glob(os.path.join(prediction_dir, f"Prediction__{model}__{Energy}__{System}__*__values.dat"))
     data_files = glob.glob(os.path.join(data_dir, f"Data__{Energy}__{System}__*.dat"))
 
     all_predictions = [Reader.ReadPrediction(f) for f in prediction_files]
@@ -134,6 +91,7 @@ for system in Coll_System:
 
     x, x_errors, y_data_results, y_data_errors = DataPred.get_data(all_data[sys], sys)
     y_train_results, y_train_errors, y_val_results, y_val_errors = DataPred.get_predictions(all_predictions, train_indices, validation_indices, sys)
+
 print("Data and predictions loaded successfully.")
 
 ######### Emulators ########
@@ -150,7 +108,7 @@ if Train_Surmise:
         method_type = 'PCGP'
 
     Emulators['surmise'], PredictionVal['surmise_val'], PredictionTrain['surmise_train'] = Emulation.train_surmise(Emulators, x, y_train_results, train_points, validation_points, output_dir, method_type)
-else:
+elif Load_Surmise:
     print("Loading Surmise emulator.")
     Emulators['surmise'] = {}
     Emulators['surmise'], PredictionVal['surmise_val'], PredictionTrain['surmise_train'] = Emulation.load_surmise(Emulators['surmise'], x, train_points, validation_points, output_dir)
@@ -163,17 +121,18 @@ if Train_Scikit:
         print("PCA is not supported for Scikit-learn emulator. Using standard Gaussian Process.") 
         
     Emulators['scikit'], PredictionVal['scikit_val'], PredictionTrain['scikit_train'] = Emulation.train_scikit(Emulators, x, y_train_results, train_points, validation_points, output_dir, method_type)
-else:
+elif Load_Scikit:
     print("Loading Scikit-learn emulator.")
 
     Emulators['scikit'] = {}
     Emulators['scikit'], PredictionVal['scikit_val'], PredictionTrain['scikit_train'] = Emulation.load_scikit(Emulators['scikit'], x, train_points, validation_points, output_dir)
 
 os.makedirs(f"{output_dir}/plots/emulators/", exist_ok=True)
+
 Plots.plot_rmse_comparison(y_train_results, y_val_results, PredictionTrain, PredictionVal, output_dir)
     
 ########### Calibration ###########
-if Run_Calibration:
+if Run_Caibration:
     print("Running calibration.")
     os.makedirs(f"{output_dir}/calibration/samples/", exist_ok=True)
     os.makedirs(f"{output_dir}/calibration/pos0/", exist_ok=True)

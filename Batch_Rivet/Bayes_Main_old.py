@@ -84,21 +84,7 @@ os.makedirs(output_dir + "/plots", exist_ok=True)
 
 ############## Design Points ####################
 print("Loading design points from input directory.")
-
-index_files = DataPred.get_design_index(main_dir)
-merged_Design_file = f"Design__Rivet__Merged.dat"
-merged_output_file = f'{main_dir}/input/Design/{merged_Design_file}'
-shutil.copy(f"{main_dir}/input/Rivet/parameter_prior_list.dat", merged_output_file)
-existing_rows = DataPred.get_existing_design_points(index_files)
-
-with open(merged_output_file, 'a') as f:
-    f.write(f"\n\n# Total Design Points Merged = {len(existing_rows)}")
-    f.write('\n' + "# Design point indices (row index): " + ' '.join(str(i) for i in range(len(existing_rows))) + '\n')   
-    f.write("\n".join(existing_rows) + "\n")
-print(f"➕ Appended {len(existing_rows)} design points to {merged_output_file}")
-print(f"Loading {merged_Design_file} from input directory.") 
-
-RawDesign = Reader.ReadDesign(f'{main_dir}/input/Design/{merged_Design_file}')
+RawDesign = Reader.ReadDesign(f'{main_dir}/input/Design/Design__Rivet.dat')
 priors, parameter_names, dim= DesignPoints.get_prior(RawDesign)
 train_points, validation_points, train_indices, validation_indices = DesignPoints.load_data(train_size, validation_size, RawDesign['Design'], priors, seed)
 
@@ -108,32 +94,25 @@ plt.savefig(f"{output_dir}/plots/Design_Points.png")
 plt.show()
 
 print("Loading input directory.")
-
 prediction_dir, data_dir = f"{main_dir}/input/Prediction", f"{main_dir}/input/Data"
-DG_predictions_files = glob.glob(f"{prediction_dir}/*.dat")
-merged_dir = f"{main_dir}/input/Prediction_Merged"
-os.makedirs(merged_dir, exist_ok=True)
-DataPred.group_histograms_by_design(DG_predictions_files, merged_dir)
-
+    
 Data = {}
 Predictions = {}
 all_data = {}
-n_hist = {}
 
 for system in Coll_System:
     System, Energy = system.split('_')[0], system.split('_')[1]  
     sys = System + Energy   
 
-    prediction_files = glob.glob(os.path.join(merged_dir, f"Prediction__{model}__{Energy}__{System}__*__values.dat"))
+    prediction_files = glob.glob(os.path.join(prediction_dir, f"Prediction__{model}__{Energy}__{System}__*__values.dat"))
     data_files = glob.glob(os.path.join(data_dir, f"Data__{Energy}__{System}__*.dat"))
 
     all_predictions = [Reader.ReadPrediction(f) for f in prediction_files]
     all_data[sys] = [Reader.ReadData(f) for f in data_files]
 
-    n_hist[sys] = len(prediction_files)
-
     x, x_errors, y_data_results, y_data_errors = DataPred.get_data(all_data[sys], sys)
     y_train_results, y_train_errors, y_val_results, y_val_errors = DataPred.get_predictions(all_predictions, train_indices, validation_indices, sys)
+
 print("Data and predictions loaded successfully.")
 
 ######### Emulators ########
@@ -197,6 +176,6 @@ if Result_plots:
         print(f"Warning: Minimum samples ({min_samples}) is less than requested size ({size}). Adjusting size to {min_samples}.")
         size = min_samples
 
-    Plots.results(size, x, all_data, samples_results, y_data_results, y_data_errors, Emulators, n_hist, output_dir)
+    Plots.results(size, x, all_data, samples_results, y_data_results, y_data_errors, Emulators, output_dir)
     
 print("done")
